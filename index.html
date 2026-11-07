@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pexels Photowalk Bingo · Astoria Park</title>
+<meta name="description" content="Interactive photowalk bingo for the Pexels photowalk at Astoria Park, Nov 7, 2026.">
+<style>
+  :root {
+    --orange: #b84c08;
+    --yellow: #f0b429;
+    --peach: #fae9dc;
+    --cream: #fdf1cc;
+    --ink: #1a1a1a;
+    --white: #ffffff;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--white); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+    line-height: 1.4;
+    padding-bottom: 48px;
+  }
+  .band { height: 14px; background: var(--yellow); }
+  .wrap {
+    max-width: 880px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  header { text-align: center; padding-top: 22px; }
+  header img { width: 150px; max-width: 50%; height: auto; }
+  h1 { color: var(--orange); font-size: clamp(34px, 9vw, 52px); line-height: 1; margin: 12px 0 6px; }
+  .date { font-size: 18px; margin: 0 0 14px; }
+  .rules { font-size: 14px; margin: 0 auto; max-width: 62ch; }
+  .rules strong { color: var(--orange); display: block; }
+
+  .status {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 12px 20px; margin: 18px 0 14px;
+  }
+  .stat { font-weight: 700; color: var(--orange); font-variant-numeric: tabular-nums; }
+  .mini { display: grid; grid-template-columns: repeat(7, 9px); gap: 2px; }
+  .mini i { display: block; width: 9px; height: 9px; background: var(--peach); border-radius: 1px; }
+  .mini i.on { background: var(--orange); }
+  .mini i.mine { outline: 1px solid var(--yellow); outline-offset: -1px; }
+
+  .banner {
+    background: var(--yellow); border: 3px solid var(--orange); border-radius: 12px;
+    padding: 12px 16px; font-weight: 800; font-size: 22px; text-align: center; margin-bottom: 14px;
+  }
+  .banner small { display: block; font-size: 14px; font-weight: 600; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 3px solid var(--orange); background: var(--orange); gap: 2px;
+  }
+  @media (min-width: 640px) {
+    .grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  }
+  .cell {
+    position: relative; min-width: 0; min-height: 96px; aspect-ratio: 1 / 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 3px; padding: 8px 6px;
+    background: var(--peach); color: var(--ink); border: 0; cursor: pointer; font: inherit;
+    overflow: hidden;
+  }
+  .cell:nth-child(even) { background: var(--cream); }
+  .cell.mine { background: var(--yellow); }
+  .cell:focus-visible { outline: 3px solid var(--ink); outline-offset: -3px; }
+  .cell .label { font-weight: 800; font-size: 14px; line-height: 1.1; overflow-wrap: anywhere; }
+  .cell .tip { font-size: 11px; line-height: 1.2; color: var(--orange); }
+  .cell.mine .tip { color: #000; }
+  .cell .box {
+    position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
+    width: 18px; height: 18px; background: #fff; border: 2px solid var(--orange); border-radius: 2px;
+    display: grid; place-items: center; font-weight: 900; font-size: 14px; line-height: 1; color: var(--orange);
+  }
+  .cell.has-photo { color: #fff; justify-content: flex-end; padding-bottom: 28px; }
+  .cell.has-photo .bg {
+    position: absolute; inset: 0; background-size: cover; background-position: center;
+  }
+  .cell.has-photo .bg::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.05) 65%);
+  }
+  .cell.has-photo .label, .cell.has-photo .tip { position: relative; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .cell.has-photo .tip { display: none; }
+  .cell[data-line="1"] { box-shadow: inset 0 0 0 4px var(--ink); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 18px 0 8px; }
+  button.btn, label.btn {
+    font: inherit; font-weight: 700; font-size: 15px; cursor: pointer;
+    border: 2px solid var(--orange); background: var(--orange); color: #fff;
+    border-radius: 999px; padding: 9px 18px; display: inline-block;
+  }
+  button.btn.ghost { background: #fff; color: var(--orange); }
+  button.btn:focus-visible, label.btn:focus-within { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .note { font-size: 13px; color: #555; text-align: center; max-width: 60ch; margin: 8px auto 0; }
+  footer { text-align: center; color: var(--orange); font-weight: 700; margin-top: 22px; }
+  footer a { color: var(--orange); }
+
+  dialog {
+    width: min(94vw, 460px); max-height: 92vh; overflow: auto;
+    border: 3px solid var(--orange); border-radius: 14px; padding: 0; background: #fff; color: var(--ink);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.5); }
+  .sheet { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .sheet h2 { margin: 0; color: var(--orange); font-size: 24px; line-height: 1.1; }
+  .sheet .tip { margin: 0; font-size: 14px; color: #444; }
+  .preview {
+    width: 100%; aspect-ratio: 4 / 3; border-radius: 8px; background: var(--peach);
+    display: grid; place-items: center; color: var(--orange); font-weight: 700; text-align: center; overflow: hidden;
+  }
+  .preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .field { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 14px; }
+  .field input[type="text"] { font: inherit; padding: 9px 10px; border: 2px solid var(--orange); border-radius: 8px; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+  .check input { width: 20px; height: 20px; accent-color: var(--orange); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .row .btn { flex: 1 1 auto; text-align: center; }
+  input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="band"></div>
+<div class="wrap">
+  <header>
+    <img src="pexels-logo.png" alt="Pexels">
+    <h1>Photowalk Bingo</h1>
+    <p class="date">Saturday, November 7, 2026 · Astoria Park</p>
+    <p class="rules">
+      Snap a photo for each square as we walk. Tap a square to add your photo and mark it done.
+      <strong>Rule 1: Seven in a row wins. Across, down, or corner to corner.</strong>
+      <strong>Rule 2: Every photo has to be taken on this walk.</strong>
+      <strong>Rule 3: The yellow squares are yours. Write your own idea, then go shoot it.</strong>
+    </p>
+  </header>
+
+  <div class="status" aria-live="polite">
+    <span class="stat" id="count">0 / 49 squares</span>
+    <div class="mini" id="mini" aria-hidden="true"></div>
+    <span class="stat" id="lines">0 bingos</span>
+  </div>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="actions">
+    <button class="btn" id="saveCard" type="button">Save my card as an image</button>
+    <button class="btn ghost" id="savePhotos" type="button">Download my photos</button>
+    <button class="btn ghost" id="reset" type="button">Start over</button>
+  </div>
+  <p class="note">Your photos and marks stay on this phone, in this browser. Nothing is uploaded. Use the buttons above to save them before you clear your browser data.</p>
+
+  <footer>Got a bingo? Show the group, then keep shooting!</footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="sheet">
+    <h2 id="dlgTitle"></h2>
+    <p class="tip" id="dlgTip"></p>
+    <label class="field" id="ideaField" hidden>
+      Your idea
+      <input type="text" id="ideaInput" maxlength="40" placeholder="Write your own idea" autocomplete="off">
+    </label>
+    <div class="preview" id="preview">No photo yet</div>
+    <div class="row">
+      <label class="btn" id="pickLabel" for="fileInput">Add photo</label>
+      <button class="btn ghost" id="removePhoto" type="button" hidden>Remove photo</button>
+    </div>
+    <input type="file" id="fileInput" accept="image/*">
+    <label class="check"><input type="checkbox" id="doneCheck"> Mark done</label>
+    <button class="btn ghost" id="closeDlg" type="button">Close</button>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  var N = 7, MID = 3;
+  var PROMPTS = [
+    ["Portraits", "Ask first, then shoot"],
+    ["Fall leaves", "Backlit if you can"],
+    ["Skate park", "Lines, curves, concrete"],
+    ["Things in park", "Benches, signs, gear"],
+    ["Hell Gate Bridge", "Steel arch, stone towers"],
+    ["RFK Bridge", "Shoot up from below"],
+    ["Manhattan skyline", "Across the East River"],
+    ["East River shore", "Rocks, railing, water"],
+    ["Astoria Pool", "NYC's oldest and largest"],
+    ["Running track", "Lanes and lines"],
+    ["Tennis courts", "Nets and fences"],
+    ["Sky over the river", "Clouds, color, open space"],
+    ["Group shot", "At least 3-4 people"],
+    ["Playground", "Color and motion"],
+    ["Dogs", "Get down to their level"],
+    ["Goose on water", "Wings, ripples, reflections"],
+    ["Acorns & pine cones", "Look on the ground"],
+    ["Sand", "Near the water"],
+    ["Train on the bridge", "Catch one crossing"],
+    ["Squirrel", "Busy stocking up for winter"],
+    ["Stoop pumpkins", "On the streets nearby"],
+    ["Warm drink", "Steam and cold hands"],
+    ["Cyclists", "Pan for motion blur"],
+    ["Fall layers", "Scarves, beanies, boots"],
+    ["Ginkgo leaves", "Bright yellow fan shapes"],
+    ["Randalls Island", "Across the water"],
+    ["Boat on the river", "Tug, barge, or ferry"],
+    ["NYC Parks sign", "Green and white"],
+    ["Candid moment", "Someone not posing"],
+    ["Steel & rivets", "Bridge details"],
+    ["Astoria rowhouse", "Brick, doors, stoops"],
+    ["Reflection", "River, puddles, glass"],
+    ["Pumpkin treat", "Pumpkin coffee or soup"],
+    ["Street art", "Wide shot, then a detail"],
+    ["Frame in a frame", "Shoot through a gap"],
+    ["Birds in flight", "Gulls over the river"]
+  ];
+
+  // Build cell list: blank cross on row 3 and column 3.
+  var cells = [], p = 0, r, c;
+  for (r = 0; r < N; r++) {
+    for (c = 0; c < N; c++) {
+      if (r === MID || c === MID) cells.push({ mine: true });
+      else cells.push({ mine: false, label: PROMPTS[p][0], tip: PROMPTS[p++][1] });
+    }
+  }
+
+  var LINES = [], d1 = [], d2 = [], row, col;
+  for (r = 0; r < N; r++) {
+    row = []; col = [];
+    for (c = 0; c < N; c++) { row.push(r * N + c); col.push(c * N + r); }
+    LINES.push(row, col); d1.push(r * N + r); d2.push(r * N + (N - 1 - r));
+  }
+  LINES.push(d1, d2);
+
+  // ---- storage ----
+  var KEY = "pexels-photowalk-astoria-2026-11-07";
+  var state = { done: {}, ideas: {} };
+  try {
+    var s = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (s && s.done && s.ideas) state = s;
+  } catch (e) {}
+  function saveState() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  var photos = {};   // index -> Blob (always in memory)
+  var urls = {};     // index -> object URL
+  var db = null;
+  function openDB() {
+    return new Promise(function (resolve) {
+      try {
+        var req = indexedDB.open("photowalk-astoria", 1);
+        req.onupgradeneeded = function () { req.result.createObjectStore("photos"); };
+        req.onsuccess = function () { db = req.result; resolve(); };
+        req.onerror = function () { resolve(); };
+      } catch (e) { resolve(); }
+    });
+  }
+  function dbLoad() {
+    return new Promise(function (resolve) {
+      if (!db) return resolve();
+      try {
+        var tx = db.transaction("photos", "readonly");
+        var st = tx.objectStore("photos");
+        var cur = st.openCursor();
+        cur.onsuccess = function () {
+          var cc = cur.result;
+          if (cc) { photos[cc.key] = cc.value; cc.continue(); } else resolve();
+        };
+        cur.onerror = function () { resolve(); };
+      } catch (e) { resolve(); }
+    });
+  }
+  function dbPut(i, blob) {
+    if (!db) return;
+    try { db.transaction("photos", "readwrite").objectStore("photos").put(blob, i); } catch (e) {}
+  }
+  function dbDelete(i) {
+    if (!db) return;
+    try { db.transaction("photos", "readwrite").objectStore("photos").delete(i); } catch (e) {}
+  }
+  function urlFor(i) {
+    if (!photos[i]) return null;
+    if (!urls[i]) urls[i] = URL.createObjectURL(photos[i]);
+    return urls[i];
+  }
+  function dropUrl(i) { if (urls[i]) { URL.revokeObjectURL(urls[i]); delete urls[i]; } }
+
+  function resize(file, max) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image(), u = URL.createObjectURL(file);
+      img.onload = function () {
+        var k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        var cv = document.createElement("canvas");
+        cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(u);
+        cv.toBlob(function (b) { b ? resolve(b) : reject(); }, "image/jpeg", 0.88);
+      };
+      img.onerror = function () { URL.revokeObjectURL(u); reject(); };
+      img.src = u;
+    });
+  }
+
+  // ---- helpers ----
+  function labelOf(i) {
+    var cl = cells[i];
+    if (!cl.mine) return cl.label;
+    return (state.ideas[i] || "").trim() || "YOUR IDEA";
+  }
+  function isDone(i) {
+    if (cells[i].mine && !(state.ideas[i] || "").trim()) return false;
+    return !!(photos[i] || state.done[i]);
+  }
+
+  // ---- render ----
+  var grid = document.getElementById("grid"), mini = document.getElementById("mini");
+  var btns = [], dots = [];
+  cells.forEach(function (cl, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "cell" + (cl.mine ? " mine" : "");
+    b.addEventListener("click", function () { openCell(i); });
+    grid.appendChild(b); btns.push(b);
+    var d = document.createElement("i"); if (cl.mine) d.className = "mine"; mini.appendChild(d); dots.push(d);
+  });
+
+  function esc(t) { return t.replace(/[&<>"]/g, function (m) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]; }); }
+
+  function render() {
+    var done = 0, inLine = {}, bingos = 0;
+    cells.forEach(function (cl, i) {
+      var b = btns[i], u = urlFor(i), dn = isDone(i);
+      if (dn) done++;
+      b.className = "cell" + (cl.mine ? " mine" : "") + (u ? " has-photo" : "");
+      var tip = cl.mine ? ((state.ideas[i] || "").trim() ? "Your idea" : "Tap to write your idea") : cl.tip;
+      b.innerHTML =
+        (u ? '<span class="bg" style="background-image:url(' + u + ')"></span>' : "") +
+        '<span class="label">' + esc(labelOf(i)) + '</span>' +
+        '<span class="tip">' + esc(tip) + '</span>' +
+        '<span class="box">' + (dn ? "X" : "") + '</span>';
+      b.setAttribute("aria-label", labelOf(i) + (dn ? ", done" : ", not yet"));
+      dots[i].classList.toggle("on", dn);
+    });
+    LINES.forEach(function (ln) {
+      if (ln.every(isDone)) { bingos++; ln.forEach(function (i) { inLine[i] = true; }); }
+    });
+    cells.forEach(function (cl, i) {
+      if (inLine[i]) btns[i].setAttribute("data-line", "1"); else btns[i].removeAttribute("data-line");
+    });
+    document.getElementById("count").textContent = done + " / 49 squares";
+    document.getElementById("lines").textContent = bingos + (bingos === 1 ? " bingo" : " bingos");
+    var ban = document.getElementById("banner");
+    if (bingos > 0) {
+      ban.hidden = false;
+      ban.innerHTML = (bingos === 1 ? "Bingo!" : bingos + " bingos!") + "<small>Outlined squares make the line. Show the group.</small>";
+    } else ban.hidden = true;
+  }
+
+  // ---- dialog ----
+  var dlg = document.getElementById("dlg"), cur = -1;
+  var fileInput = document.getElementById("fileInput");
+  var ideaInput = document.getElementById("ideaInput");
+  var doneCheck = document.getElementById("doneCheck");
+  var removeBtn = document.getElementById("removePhoto");
+  var preview = document.getElementById("preview");
+
+  function fillDialog() {
+    var i = cur, cl = cells[i], u = urlFor(i);
+    document.getElementById("dlgTitle").textContent = labelOf(i);
+    document.getElementById("dlgTip").textContent = cl.mine ? "Write your own idea, then go shoot it." : cl.tip;
+    document.getElementById("ideaField").hidden = !cl.mine;
+    ideaInput.value = state.ideas[i] || "";
+    preview.innerHTML = u ? '<img alt="Your photo for ' + esc(labelOf(i)) + '" src="' + u + '">' : "No photo yet";
+    removeBtn.hidden = !photos[i];
+    document.getElementById("pickLabel").textContent = photos[i] ? "Replace photo" : "Add photo";
+    doneCheck.checked = isDone(i);
+    doneCheck.disabled = !!photos[i];
+  }
+  function openCell(i) {
+    cur = i; fillDialog();
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  }
+  function closeDlg() { if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); render(); }
+  document.getElementById("closeDlg").addEventListener("click", closeDlg);
+  dlg.addEventListener("close", render);
+
+  ideaInput.addEventListener("input", function () {
+    state.ideas[cur] = ideaInput.value; saveState();
+    document.getElementById("dlgTitle").textContent = labelOf(cur);
+    doneCheck.checked = isDone(cur);
+  });
+  doneCheck.addEventListener("change", function () {
+    if (doneCheck.checked) state.done[cur] = true; else delete state.done[cur];
+    saveState(); render();
+  });
+  fileInput.addEventListener("change", function () {
+    var f = fileInput.files && fileInput.files[0];
+    if (!f || cur < 0) return;
+    var i = cur;
+    resize(f, 1600).then(function (blob) {
+      photos[i] = blob; dropUrl(i); dbPut(i, blob);
+      state.done[i] = true; saveState();
+      if (cur === i) fillDialog();
+      render();
+    }).catch(function () {
+      preview.textContent = "That file could not be read. Try another photo.";
+    });
+    fileInput.value = "";
+  });
+  removeBtn.addEventListener("click", function () {
+    var i = cur; delete photos[i]; dropUrl(i); dbDelete(i); delete state.done[i]; saveState();
+    fillDialog(); render();
+  });
+
+  // ---- downloads ----
+  function slug(t) { return t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "photo"; }
+  function saveBlob(blob, name) {
+    var a = document.createElement("a"), u = URL.createObjectURL(blob);
+    a.href = u; a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(u); a.remove(); }, 1500);
+  }
+  document.getElementById("savePhotos").addEventListener("click", function () {
+    var keys = Object.keys(photos);
+    if (!keys.length) { alert_("No photos yet. Add one to a square first."); return; }
+    keys.forEach(function (k, n) {
+      setTimeout(function () { saveBlob(photos[k], "astoria-park-" + (Number(k) + 1) + "-" + slug(labelOf(Number(k))) + ".jpg"); }, n * 400);
+    });
+  });
+  function alert_(msg) {
+    var b = document.getElementById("banner");
+    b.hidden = false; b.innerHTML = msg;
+    setTimeout(render, 2500);
+  }
+
+  function loadImg(url) {
+    return new Promise(function (res) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = url; });
+  }
+  document.getElementById("saveCard").addEventListener("click", function () {
+    var S = 220, W = S * N, H = S * N + 150;
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var g = cv.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#f0b429"; g.fillRect(0, 0, W, 16);
+    g.fillStyle = "#b84c08"; g.font = "800 64px Helvetica, Arial, sans-serif"; g.textAlign = "center";
+    g.fillText("Photowalk Bingo", W / 2, 90);
+    g.fillStyle = "#1a1a1a"; g.font = "28px Helvetica, Arial, sans-serif";
+    g.fillText("Astoria Park · Saturday, November 7, 2026", W / 2, 132);
+    var top = 150;
+    var jobs = cells.map(function (cl, i) { return photos[i] ? loadImg(urlFor(i)) : Promise.resolve(null); });
+    Promise.all(jobs).then(function (imgs) {
+      cells.forEach(function (cl, i) {
+        var x = (i % N) * S, y = top + Math.floor(i / N) * S;
+        g.fillStyle = cl.mine ? "#f0b429" : (((Math.floor(i / N) + i % N) % 2) ? "#fdf1cc" : "#fae9dc");
+        g.fillRect(x, y, S, S);
+        var im = imgs[i];
+        if (im) {
+          var k = Math.max(S / im.naturalWidth, S / im.naturalHeight), w = im.naturalWidth * k, h = im.naturalHeight * k;
+          g.save(); g.beginPath(); g.rect(x, y, S, S); g.clip();
+          g.drawImage(im, x + (S - w) / 2, y + (S - h) / 2, w, h); g.restore();
+          var gr = g.createLinearGradient(0, y + S * 0.45, 0, y + S);
+          gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.75)");
+          g.fillStyle = gr; g.fillRect(x, y, S, S);
+        }
+        g.textAlign = "center"; g.font = "800 21px Helvetica, Arial, sans-serif";
+        g.fillStyle = im ? "#fff" : "#1a1a1a";
+        var words = labelOf(i).split(" "), lines = [], ln = "";
+        words.forEach(function (wd) {
+          var t = ln ? ln + " " + wd : wd;
+          if (g.measureText(t).width > S - 20 && ln) { lines.push(ln); ln = wd; } else ln = t;
+        });
+        lines.push(ln);
+        var ty = im ? y + S - 16 - (lines.length - 1) * 24 : y + S / 2 - (lines.length - 1) * 12;
+        lines.forEach(function (l, n) { g.fillText(l, x + S / 2, ty + n * 24); });
+        if (isDone(i)) {
+          g.fillStyle = "#fff"; g.fillRect(x + S - 40, y + 10, 30, 30);
+          g.strokeStyle = "#b84c08"; g.lineWidth = 3; g.strokeRect(x + S - 40, y + 10, 30, 30);
+          g.fillStyle = "#b84c08"; g.font = "900 24px Helvetica, Arial, sans-serif"; g.fillText("X", x + S - 25, y + 34);
+        }
+      });
+      g.strokeStyle = "#b84c08"; g.lineWidth = 5;
+      for (var k = 0; k <= N; k++) {
+        g.beginPath(); g.moveTo(0, top + k * S); g.lineTo(W, top + k * S); g.stroke();
+        g.beginPath(); g.moveTo(k * S, top); g.lineTo(k * S, top + N * S); g.stroke();
+      }
+      cv.toBlob(function (b) { if (b) saveBlob(b, "astoria-park-photowalk-bingo.jpg"); }, "image/jpeg", 0.9);
+    });
+  });
+
+  // ---- reset (two taps, no browser dialogs) ----
+  var resetBtn = document.getElementById("reset"), armed = false, armTimer;
+  resetBtn.addEventListener("click", function () {
+    if (!armed) {
+      armed = true; resetBtn.textContent = "Tap again to erase everything";
+      armTimer = setTimeout(function () { armed = false; resetBtn.textContent = "Start over"; }, 4000);
+      return;
+    }
+    clearTimeout(armTimer); armed = false; resetBtn.textContent = "Start over";
+    Object.keys(photos).forEach(function (k) { dropUrl(k); dbDelete(Number(k)); });
+    photos = {}; state = { done: {}, ideas: {} }; saveState(); render();
+  });
+
+  render();
+  openDB().then(dbLoad).then(render);
+})();
+</script>
+</body>
+</html>
