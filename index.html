@@ -88,6 +88,29 @@
   .cell.has-photo .tip { display: none; }
   .cell[data-line="1"] { box-shadow: inset 0 0 0 4px var(--ink); }
 
+  .tap-hint { display: none; text-align: center; font-size: 13px; color: #555; margin: 0 0 8px; }
+
+  /* Phones: keep the full 7x7 card on screen. Tips move into the tap-to-open sheet. */
+  @media (max-width: 639px) {
+    .wrap {
+      padding-left: max(10px, env(safe-area-inset-left, 0px));
+      padding-right: max(10px, env(safe-area-inset-right, 0px));
+    }
+    .mini { display: none; }
+    .status { margin: 14px 0 10px; }
+    .grid { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; border-width: 2px; }
+    .cell { min-height: 0; padding: 3px 2px 14px; gap: 0; }
+    .cell .label {
+      font-size: clamp(7px, 2.2vw, 11px); line-height: 1.08;
+      overflow-wrap: normal; word-break: normal; hyphens: auto;
+    }
+    .cell .tip { display: none; }
+    .cell .box { width: 11px; height: 11px; bottom: 3px; border-width: 1.5px; font-size: 9px; }
+    .cell.has-photo { padding-bottom: 14px; }
+    .cell[data-line="1"] { box-shadow: inset 0 0 0 2px var(--ink); }
+    .tap-hint { display: block; }
+  }
+
   .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 18px 0 8px; }
   button.btn, label.btn {
     font: inherit; font-weight: 700; font-size: 15px; cursor: pointer;
@@ -145,6 +168,7 @@
 
   <div class="banner" id="banner" hidden></div>
 
+  <p class="tap-hint">Tap any square for its tip and to add your photo.</p>
   <div class="grid" id="grid"></div>
 
   <div class="actions">
